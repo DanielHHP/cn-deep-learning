@@ -22,12 +22,11 @@ class DDPG():
         self.critic_target.model.set_weights(self.critic_local.model.get_weights())
         self.actor_target.model.set_weights(self.actor_local.model.get_weights())
 
-        # Noise process TODO
-        #self.exploration_mu = 0
-        #self.exploration_theta = 0.15
-        #self.exploration_sigma = 0.2
-        #self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
-        self.noise = OUNoise(self.action_size)
+        # Noise process
+        self.exploration_mu = None
+        self.exploration_theta = 0.15
+        self.exploration_sigma = 0.2
+        self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
         self.buffer_size = 100000
@@ -36,7 +35,8 @@ class DDPG():
 
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
-        self.tau = 0.01  # for soft update of target parameters
+        # TODO tau from 0.01 -> 0.001
+        self.tau = 0.001  # for soft update of target parameters
 
         # score
         self.best_score = -np.inf
