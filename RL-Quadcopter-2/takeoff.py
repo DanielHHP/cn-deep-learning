@@ -20,18 +20,58 @@ class Takeoff():
 
         self.state_size = self.action_repeat * 6
         self.action_low = 0
-        self.action_high = 900
+        self.action_high = 3000
         self.action_size = 4
 
         # Goal
         self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.])
+    
+    def reward_calc_v1(self):
+        reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+
+        return reward
+
+    def reward_calc_v2(self):
+        reward = 1.
+        # position penalty
+        reward -= 0.3 * abs(self.sim.pose[:3] - self.target_pos).sum()
+        # height penalty
+        reward -= 0.6 * abs(self.sim.pose[2] - self.target_pos[2])
+        # eular penalty
+        reward -= 3 * abs(self.sim.pose[3:6]).sum()
+        # eular speed penalty
+        reward -= 3 * abs(self.sim.angular_v).sum()
+        # z speed reward
+        reward += 3 * (self.sim.v[2])
+        # speed penalty
+        reward -= 3 * abs(self.sim.v[:2]).sum()
+        # crash penalty
+        if (self.sim.pose[2] <= 0.):
+            reward -= 50
+        # bonus reward
+        if self.sim.pose[2] >= self.target_pos[2]:
+            reward += 100
+        
+        return reward
+    
+    def reward_calc_v3(self):
+        reward = 1.
+        # position penalty
+        reward -= 0.3 * abs(self.sim.pose[:3] - self.target_pos).sum()
+        # height penalty
+        reward -= 0.6 * abs(self.sim.pose[2] - self.target_pos[2])
+        # crash penalty
+        if (self.sim.pose[2] <= 0.):
+            reward -= 50
+        # bonus reward
+        if self.sim.pose[2] >= self.target_pos[2]:
+            reward += 200
+        
+        return reward
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = 1. - 0.3*((abs(self.sim.pose[:3] - self.target_pos)).sum()) - 0.6*abs(self.sim.pose[2] - self.target_pos[2]) - 0.6*abs(self.sim.pose[4]) + 0.6*(self.sim.v[2])
-        if self.sim.pose[2] >= self.target_pos[2]:
-            # bonus reward
-            reward += 50
+        reward = self.reward_calc_v3()
         return reward
 
     def step(self, rotor_speeds):
