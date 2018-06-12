@@ -39,7 +39,7 @@ class DDPG():
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
         # TODO tau from 0.01 -> 0.001
-        self.tau = 0.001  # for soft update of target parameters
+        self.tau = 0.01  # for soft update of target parameters
 
         # score
         self.best_score = -np.inf

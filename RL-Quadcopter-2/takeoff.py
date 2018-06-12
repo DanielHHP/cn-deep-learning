@@ -20,7 +20,7 @@ class Takeoff():
 
         self.state_size = self.action_repeat * 6
         self.action_low = 0
-        self.action_high = 3000
+        self.action_high = 1000
         self.action_size = 4
 
         # Goal
@@ -69,9 +69,25 @@ class Takeoff():
         
         return reward
 
+    def reward_calc_v4(self):
+        reward = 0.
+        # height
+        reward += self.sim.pose[2]
+
+        # pos
+        reward -= .5 * abs(self.sim.pose[:1]).sum()
+
+        # v
+        reward += .5 * self.sim.v[2]
+
+        # angular v
+        reward -= .25 * (abs(self.sim.angular_v[:3])).sum()
+
+        return reward
+
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = self.reward_calc_v3()
+        reward = self.reward_calc_v4()
         return reward
 
     def step(self, rotor_speeds):
